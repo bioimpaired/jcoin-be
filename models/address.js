@@ -8,8 +8,8 @@ const AddressSchema = new Schema({
     required: [true, "address is required"]
   },
   balance: {
-    type: String,
-    default: "0"
+    type: Number,
+    default: 100
   },
   transactions: [Transaction.TransactionSchema]
 });

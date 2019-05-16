@@ -33,11 +33,11 @@ router.get("/addresses/:address", (req, res, next) => {
     .catch(next);
 });
 
+// clean this up
 router.post("/transactions", (req, res, next) => {
-  console.log("posting", req.body);
   const toAddress = req.body.toAddress;
   const fromAddress = req.body.fromAddress;
-  const amount = req.body.amount;
+  const amount = parseInt(req.body.amount);
   const date = new Date();
   // add time stamp and update balance
   const transaction = new Transaction.Transaction({
@@ -46,22 +46,46 @@ router.post("/transactions", (req, res, next) => {
     amount: amount,
     timestamp: date.toISOString()
   });
+  console.log("posting", req.body);
 
   // add transaction to toAddress
   Address.findOneAndUpdate(
     { address: toAddress },
-    { $push: { transactions: transaction } }
+    {
+      $push: { transactions: transaction }
+    }
   )
     .then(a => {
-      // add transaction to fromAddress
+      console.log("toaddress done", a);
+
+      const newBalance = a.balance + amount;
+      Address.findOneAndUpdate(
+        { address: toAddress },
+        {
+          $set: { balance: newBalance }
+        }
+      ).catch(next);
+    })
+    .catch(next);
+
+  // add transaction to fromAddress
+  Address.findOneAndUpdate(
+    { address: fromAddress },
+    {
+      $push: { transactions: transaction }
+    }
+  )
+    .then(a => {
+      console.log("fromaddress done", a);
+
+      const newBalance = a.balance - amount;
       Address.findOneAndUpdate(
         { address: fromAddress },
-        { $push: { transactions: transaction }, $set: { balance: 50 } }
-      )
-        .then(a => {
-          res.send({ status: "OK" });
-        })
-        .catch(next);
+        {
+          $set: { balance: newBalance }
+        }
+      ).catch(next);
+      res.send({ status: "OK" });
     })
     .catch(next);
 });

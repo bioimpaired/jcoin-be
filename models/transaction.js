@@ -10,7 +10,7 @@ const TransactionSchema = new Schema({
     required: [true, "toAddress is required"]
   },
   amount: {
-    type: String,
+    type: Number,
     required: [true, "amount is required"]
   },
   timestamp: {
