@@ -56,7 +56,7 @@ router.post("/transactions", (req, res, next) => {
       // add transaction to fromAddress
       Address.findOneAndUpdate(
         { address: fromAddress },
-        { $push: { transactions: transaction } }
+        { $push: { transactions: transaction }, $set: { balance: 50 } }
       )
         .then(a => {
           res.send({ status: "OK" });
